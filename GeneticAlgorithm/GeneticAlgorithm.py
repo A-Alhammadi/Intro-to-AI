@@ -22,8 +22,10 @@ class Schedule:
     def fitness(self):
         score = 0
         assigned_facilitators = {}  # Track facilitator workload
+        facilitator_timeslots = {}  # Track facilitator timeslot assignments
+
         for activity, room, timeslot, facilitator in self.assignments:
-            # Room size penalties
+         # Room size penalties
             if room.capacity < activity.enrollment:
                 score -= 0.5
             elif room.capacity > 3 * activity.enrollment:
@@ -33,7 +35,7 @@ class Schedule:
             else:
                 score += 0.3
 
-            # Facilitator preferences and workload
+        # Facilitator preferences and workload
             if activity.name in facilitators[facilitator]["preferred"]:
                 score += 0.5
             elif activity.name in facilitators[facilitator]["other"]:
@@ -45,7 +47,12 @@ class Schedule:
                 assigned_facilitators[timeslot] = set()
             assigned_facilitators[timeslot].add(facilitator)
 
-        # Check for conflicts and workload across timeslots
+        # Track timeslot assignments for each facilitator
+            if facilitator not in facilitator_timeslots:
+                facilitator_timeslots[facilitator] = []
+            facilitator_timeslots[facilitator].append(timeslot)
+
+    # Check for conflicts and workload across timeslots
         for timeslot, assigned_facilitators_set in assigned_facilitators.items():
             if len(assigned_facilitators_set) > 1:
                 score -= 0.2  # Multiple activities for a facilitator in the same timeslot
@@ -57,10 +64,9 @@ class Schedule:
             elif total_activities in [1, 2] and facilitator != "Tyler":
                 score -= 0.4
 
-        # Activity-specific adjustments (SLA 101 & 191)
+    # Activity-specific adjustments (SLA 101 & 191)
         sla101_timeslots = [t for _, _, t, _ in self.assignments if "SLA101" in activity.name]
         sla191_timeslots = [t for _, _, t, _ in self.assignments if "SLA191" in activity.name]
-
         if len(sla101_timeslots) == 2 and len(sla191_timeslots) == 2:  # Check if both lists have 2 elements
             if abs(sla101_timeslots[0] - sla101_timeslots[1]) > 4:
                 score += 0.5
@@ -71,21 +77,34 @@ class Schedule:
             elif sla191_timeslots[0] == sla191_timeslots[1]:
                 score -= 0.5 
 
-        for i in range(len(sla101_timeslots)):
-            for j in range(len(sla191_timeslots)):
-                time_diff = abs(sla101_timeslots[i] - sla191_timeslots[j])
-                if time_diff == 1: 
-                    score += 0.25
-                elif time_diff == 0:
-                    score -= 0.25
-                elif time_diff == 2: # Consecutive timeslots
-                    rooms = [r for _, r, _, _ in self.assignments if "SLA101" in activity.name or "SLA191" in activity.name]
-                    if (rooms[0] in ["Roman", "Beach"] and rooms[1] not in ["Roman", "Beach"]) or (rooms[1] in ["Roman", "Beach"] and rooms[0] not in ["Roman", "Beach"]):
-                        score -= 0.4
-                    else:
-                        score += 0.5 
+            for i in range(len(sla101_timeslots)):
+                for j in range(len(sla191_timeslots)):
+                    time_diff = abs(sla101_timeslots[i] - sla191_timeslots[j])
+                    if time_diff == 1: 
+                        score += 0.25
+                    elif time_diff == 0:
+                        score -= 0.25
+                    elif time_diff == 2: # Consecutive timeslots
+                        rooms = [r for _, r, _, _ in self.assignments if "SLA101" in activity.name or "SLA191" in activity.name]
+                        if (rooms[0] in ["Roman", "Beach"] and rooms[1] not in ["Roman", "Beach"]) or (rooms[1] in ["Roman", "Beach"] and rooms[0] not in ["Roman", "Beach"]):
+                            score -= 0.4
+                        else:
+                            score += 0.5 
 
+    # Check for consecutive timeslots for facilitators
+        for facilitator, timeslot_list in facilitator_timeslots.items():
+            for i in range(len(timeslot_list) - 1):
+                hour1 = int(timeslot_list[i].split()[0])  # Extract hour
+                hour2 = int(timeslot_list[i + 1].split()[0])  # Extract hour
+                if abs(hour1 - hour2) == 1:  # Check for consecutive hours
+                    # Get the rooms for the consecutive timeslots
+                    rooms = [r for _, r, t, f in self.assignments if f == facilitator and (t == timeslot_list[i] or t == timeslot_list[i + 1])] 
+                    if (rooms[0] in ["Roman", "Beach"] and rooms[1] not in ["Roman", "Beach"]) or (rooms[1] in ["Roman", "Beach"] and rooms[0] not in ["Roman", "Beach"]):
+                        score -= 0.4  # Penalty for different buildings
+                    else:
+                        score += 0.5  # Reward for consecutive timeslots 
         return score
+
     
 # Define facilitators with preferences and cross-over options
 facilitators = {
