@@ -129,12 +129,19 @@ def mutate(schedule, rooms):
 def main():
     # Example usage (replace with actual data)
     activities = [
-        Activity("SLA100A", 50),
-        Activity("SLA191B", 50),
-        Activity("SLA201", 50), 
-        Activity("SLA291", 50),
-        # ... add all other activities here
+      Activity("SLA100A", 50),
+    Activity("SLA100B", 50),
+    Activity("SLA191A", 50),
+    Activity("SLA191B", 50),
+    Activity("SLA201", 50),
+    Activity("SLA291", 50),
+    Activity("SLA303", 60),
+    Activity("SLA304", 25),
+    Activity("SLA394", 20),
+    Activity("SLA449", 60),
+    Activity("SLA451", 100)
     ]
+
     rooms = [
     Room("Slater 003", 45),
     Room("Roman 216", 30),
@@ -146,7 +153,7 @@ def main():
     Room("Logos 325", 450),
     Room("Frank 119", 60)
 ]
-    timeslots = ["10 AM", "11 AM", ...]
+    timeslots = ["10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM"]
 
     population_size = 500
     generations = 100
