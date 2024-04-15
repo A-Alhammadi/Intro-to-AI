@@ -112,10 +112,13 @@ facilitators = {
     "Glen": {"preferred": ["SLA100", "SLA191", "SLA201", "SLA303", "SLA304"], "other": []},
     "Banks": {"preferred": ["SLA100", "SLA191", "SLA201", "SLA291", "SLA303", "SLA304"], "other": []},
     "Richards": {"preferred": [], "other": ["SLA100", "SLA191", "SLA201", "SLA291", "SLA304", "SLA394", "SLA451"]},
+    "Shaw": {"preferred": ["SLA201", "SLA449", "SLA451"], "other": ["SLA291", "SLA303"]},
+    "Singer": {"preferred": ["SLA291", "SLA394", "SLA449", "SLA451"], "other": ["SLA201", "SLA303"]},
+    "Uther": {"preferred": ["SLA449", "SLA451"], "other": ["SLA304"]},
+    "Tyler": {"preferred": ["SLA291", "SLA304", "SLA394", "SLA449", "SLA451"], "other": []},
+    "Numen": {"preferred": [], "other": ["SLA100", "SLA191", "SLA201", "SLA291", "SLA303", "SLA304"]},
+    "Zeldin": {"preferred": ["SLA100", "SLA191", "SLA201", "SLA291", "SLA303"], "other": ["SLA304", "SLA394", "SLA449", "SLA451"]}
 }
-
-# Fitness function to evaluate a schedule
-
 
 # Generate a population of random schedules
 def generate_population(num_schedules, activities, rooms, timeslots):
@@ -146,7 +149,6 @@ def mutate(schedule, rooms):
 
 # Main function to run the genetic algorithm
 def main():
-    # Example usage (replace with actual data)
     activities = [
       Activity("SLA100A", 50),
     Activity("SLA100B", 50),
@@ -176,7 +178,7 @@ def main():
 
     population_size = 500
     generations = 100
-    mutation_rate = 0.01
+    mutation_rate = 0.000625
 
     population = generate_population(population_size, activities, rooms, timeslots)
     best_schedule = max(population, key=lambda s: s.fitness())
@@ -207,7 +209,6 @@ def main():
             break
         else:
             generation_best_fitness = current_best_fitness
-            # Adjust mutation rate here (e.g., mutation_rate /= 2)
 
     # Print best schedule
     print("Best schedule fitness:", best_fitness)
